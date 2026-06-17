@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laporan Stok Inventaris Apotek Pakis Medika Utama</title>
+    <style>
+        @page { size: A4; margin: 0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 11px;
+            color: #1E293B;
+            background: #fff;
+            padding: 15mm 20mm;
+        }
+        .doc-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid #0B3E9C;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .pharmacy-name {
+            font-size: 18px;
+            font-weight: 900;
+            color: #0F3071;
+        }
+        .pharmacy-sub {
+            font-size: 10px;
+            color: #64748B;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+        .doc-title {
+            font-size: 13px;
+            font-weight: 900;
+            color: #0F3071;
+            text-align: right;
+        }
+        .summary-banner {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+        .sum-box {
+            flex: 1;
+            border: 1px solid #E2E8F0;
+            border-radius: 5px;
+            padding: 8px 12px;
+        }
+        .s-lbl {
+            font-size: 8.5px;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: #64748B;
+        }
+        .s-val {
+            font-size: 14px;
+            font-weight: 900;
+            color: #1E293B;
+            margin-top: 2px;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        .data-table th {
+            background: #EFF6FF;
+            color: #0B3E9C;
+            font-size: 9px;
+            font-weight: 900;
+            text-transform: uppercase;
+            padding: 8px 10px;
+            border: 1px solid #BFDBFE;
+            text-align: left;
+        }
+        .data-table td {
+            padding: 9px 10px;
+            border: 1px solid #E2E8F0;
+            font-size: 10.5px;
+        }
+        .data-table tr:nth-child(even) td {
+            background: #F8FAFC;
+        }
+        .footer-sig {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 45px;
+            page-break-inside: avoid;
+        }
+        .sig-box {
+            text-align: center;
+            width: 180px;
+        }
+        .role {
+            font-weight: 800;
+            color: #475569;
+            margin-bottom: 50px;
+        }
+        .name {
+            font-weight: 900;
+            color: #1E293B;
+            text-decoration: underline;
+        }
+        .nip {
+            font-size: 9px;
+            color: #64748B;
+            margin-top: 2px;
+        }
+    </style>
+</head>
+<body onload="window.print();">
+
+    <div class="doc-header">
+        <div>
+            <div class="pharmacy-name">APOTEK PAKIS MEDIKA UTAMA</div>
+            <div class="pharmacy-sub">Sistem Kelola Laporan Stok Inventaris</div>
+        </div>
+        <div>
+            <div class="doc-title">LAPORAN STOK INVENTARIS</div>
+            <div style="font-size:10px; text-align:right; color:#64748B; margin-top:2px;">Real-Time Data Kontrol</div>
+        </div>
+    </div>
+
+    <div class="summary-banner">
+        <div class="sum-box">
+            <div class="s-lbl">Total Item Terfilter</div>
+            <div class="s-val">{{ count($items) }} Obat</div>
+        </div>
+        <div class="sum-box">
+            <div class="s-lbl">Total Estimasi Aset</div>
+            <div class="s-val" style="color: #0B3E9C;">Rp {{ number_format($items->sum('total_nilai'), 0, ',', '.') }}</div>
+        </div>
+    </div>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th style="width: 5%;">No</th>
+                <th style="width: 15%;">Kode</th>
+                <th style="width: 30%;">Nama Obat</th>
+                <th style="width: 15%;">Kategori</th>
+                <th style="width: 10%;">Stok</th>
+                <th style="width: 10%;">Min</th>
+                <th style="width: 15%;">Total Nilai</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($items as $idx => $i)
+                <tr>
+                    <td>{{ $idx + 1 }}</td>
+                    <td><strong>{{ $i->kode }}</strong></td>
+                    <td>{{ $i->nama }}</td>
+                    <td>{{ $i->kategori }}</td>
+                    <td>{{ $i->stok }} {{ $i->satuan }}</td>
+                    <td>{{ $i->min_stok }}</td>
+                    <td><strong>Rp {{ number_format($i->total_nilai, 0, ',', '.') }}</strong></td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+
+    <div class="footer-sig">
+        <div class="sig-box">
+            <div class="role">Staff Gudang Farmasi,</div>
+            <div class="name">{{ auth()->user()->name }}</div>
+            <div class="nip">ID Staf: #{{ auth()->user()->id }}</div>
+        </div>
+        <div class="sig-box">
+            <div class="role">Kepala Apoteker Pakis,</div>
+            <div class="name">apt. H. Ahmad Fauzi, S.Farm.</div>
+            <div class="nip">SIPA: 19930812/SIPA-35.78/2026/2045</div>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,61 @@
+services:
+  # PHP Application Service
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: apoteker-apps-php:latest
+    container_name: apoteker-apps-app
+    restart: unless-stopped
+    working_dir: /var/www
+    env_file:
+      - .env
+    environment:
+      DB_HOST: db
+      DB_PASSWORD: root
+    volumes:
+      - .:/var/www
+    networks:
+      - apoteker-network
+    depends_on:
+      - db
+
+  # Nginx Web Server Service
+  webserver:
+    image: nginx:alpine
+    container_name: apoteker-apps-webserver
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www
+      - ./docker/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - apoteker-network
+    depends_on:
+      - app
+
+  # MySQL Database Service
+  db:
+    image: mysql:8.0
+    container_name: apoteker-apps-db
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-apoteker_apps}
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - apoteker-network
+
+# Docker Networks
+networks:
+  apoteker-network:
+    driver: bridge
+
+# Volumes for Persistence
+volumes:
+  mysql_data:
+    driver: local
