@@ -43,7 +43,7 @@ php artisan migrate --force
 
 # Run database seeder
 echo "Running seeder..."
-php artisan db:seed --class=DatabaseSeeder
+php artisan db:seed
 
 # Cache Laravel configurations
 echo "Caching configurations, routes, and views..."
