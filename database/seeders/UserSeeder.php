@@ -12,25 +12,31 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        \App\Models\User::create([
-            'name' => 'Admin Gudang',
-            'email' => 'admin@apotek.com',
-            'password' => \Hash::make('password123'),
-            'role' => 'admin_gudang',
-        ]);
+        \App\Models\User::firstOrCreate(
+            ['email' => 'admin@apotek.com'],
+            [
+                'name' => 'Admin Gudang',
+                'password' => \Hash::make('password123'),
+                'role' => 'admin_gudang',
+            ]
+        );
 
-        \App\Models\User::create([
-            'name' => 'Apoteker Utama',
-            'email' => 'apoteker@apotek.com',
-            'password' => \Hash::make('password123'),
-            'role' => 'apoteker',
-        ]);
+        \App\Models\User::firstOrCreate(
+            ['email' => 'apoteker@apotek.com'],
+            [
+                'name' => 'Apoteker Utama',
+                'password' => \Hash::make('password123'),
+                'role' => 'apoteker',
+            ]
+        );
 
-        \App\Models\User::create([
-            'name' => 'Kasir 1',
-            'email' => 'kasir@apotek.com',
-            'password' => \Hash::make('password123'),
-            'role' => 'kasir',
-        ]);
+        \App\Models\User::firstOrCreate(
+            ['email' => 'kasir@apotek.com'],
+            [
+                'name' => 'Kasir 1',
+                'password' => \Hash::make('password123'),
+                'role' => 'kasir',
+            ]
+        );
     }
 }
