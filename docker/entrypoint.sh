@@ -41,6 +41,10 @@ php artisan storage:link --force
 echo "Running migrations..."
 php artisan migrate --force
 
+# Run database seeder
+echo "Running seeder..."
+php artisan db:seed --class=DatabaseSeeder
+
 # Cache Laravel configurations
 echo "Caching configurations, routes, and views..."
 php artisan config:cache
