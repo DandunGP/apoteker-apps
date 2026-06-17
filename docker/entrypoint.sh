@@ -29,6 +29,10 @@ echo "Error: Database connection timed out after $max_attempts attempts.\n";
 exit(1);
 '
 
+# Set permissions for storage and cache
+echo "Setting permissions..."
+chmod -R 777 /var/www/storage /var/www/bootstrap/cache
+
 # Run storage link if not already done
 echo "Linking storage..."
 php artisan storage:link --force
