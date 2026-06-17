@@ -16,7 +16,7 @@ RUN apk update && apk add --no-cache \
 
 # Configure and install PHP extensions
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip opcache
+    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip opcache xml dom
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
