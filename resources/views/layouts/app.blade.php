@@ -328,28 +328,31 @@
     
     <script>
         $(document).ready(function() {
-            var table = $('.data-table').DataTable({
-                "pageLength": 10,
-                "language": {
-                    "search": "Cari:",
-                    "lengthMenu": "Tampilkan _MENU_ data",
-                    "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-                    "paginate": {
-                        "first": "Pertama",
-                        "last": "Terakhir",
-                        "next": "Lanjut",
-                        "previous": "Balik"
-                    }
-                },
-                "dom": '<"dt-header"f>t<"dt-footer"lip>'
-            });
+            var table = null;
+            if ($('.data-table.use-datatable').length) {
+                table = $('.data-table.use-datatable').DataTable({
+                    "pageLength": 10,
+                    "language": {
+                        "search": "Cari:",
+                        "lengthMenu": "Tampilkan _MENU_ data",
+                        "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                        "paginate": {
+                            "first": "Pertama",
+                            "last": "Terakhir",
+                            "next": "Lanjut",
+                            "previous": "Balik"
+                        }
+                    },
+                    "dom": '<"dt-header"f>t<"dt-footer"lip>'
+                });
+            }
 
             // Auto-search via URL parameter on page load
             const urlParams = new URLSearchParams(window.location.search);
             const searchParam = urlParams.get('search');
             if (searchParam) {
                 $('.search-box input').val(searchParam);
-                if ($('.data-table').length) {
+                if (table && $('.data-table.use-datatable').length) {
                     table.search(searchParam).draw();
                 } else if ($('.item-card').length) {
                     filterPOSCards(searchParam);
@@ -374,7 +377,7 @@
                 }
 
                 // If DataTable is present on the page
-                if ($('.data-table').length) {
+                if (table && $('.data-table.use-datatable').length) {
                     table.search(value).draw();
                 }
                 
