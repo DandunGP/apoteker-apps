@@ -195,6 +195,10 @@
                     <i data-lucide="truck" size="18"></i>
                     Kelola Supplier
                 </a>
+                <a href="{{ route('services.index') }}" class="nav-item {{ request()->routeIs('services.*') ? 'active' : '' }}">
+                    <i data-lucide="activity" size="18"></i>
+                    Kelola Layanan Jasa
+                </a>
                 <a href="{{ route('batches.index') }}" class="nav-item {{ request()->routeIs('batches.*') ? 'active' : '' }}">
                     <i data-lucide="shopping-cart" size="18"></i>
                     Obat Masuk
