@@ -12,10 +12,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Semua record yang ada sekarang belum pernah divalidasi secara eksplisit
-        // (kolom is_validated diset default false oleh migrasi sebelumnya).
-        // Kita anggap data lama sudah "lolos" validasi karena sudah ada sebelum fitur ini.
-        DB::statement("UPDATE medicine_batches SET is_validated = 1, validated_at = NOW() WHERE is_validated = 0 AND created_at < NOW()");
+        $now = now()->toDateTimeString();
+        DB::table('medicine_batches')
+            ->where('is_validated', 0)
+            ->where('created_at', '<', $now)
+            ->update([
+                'is_validated' => 1,
+                'validated_at' => $now,
+            ]);
     }
 
     public function down(): void

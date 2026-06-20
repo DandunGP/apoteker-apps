@@ -1,3 +1,10 @@
+@php
+    $unreadNotifications = \App\Models\Notification::where('user_id', auth()->id())
+        ->whereNull('read_at')
+        ->latest()
+        ->get();
+    $nearExpiryCount = $unreadNotifications->count();
+@endphp
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -214,6 +221,9 @@
                 <a href="{{ route('admin.monitoring.expiry') }}" class="nav-item {{ request()->routeIs('admin.monitoring.expiry') ? 'active' : '' }}">
                     <i data-lucide="calendar" size="18"></i>
                     Monitoring Kadaluwarsa
+                    @if($nearExpiryCount > 0)
+                        <span class="badge badge-danger" style="margin-left: auto; font-size: 10px; border-radius: 12px; padding: 2px 6px;">{{ $nearExpiryCount }}</span>
+                    @endif
                 </a>
                 <a href="{{ route('admin.retur-pemusnahan.index') }}" class="nav-item {{ request()->routeIs('admin.retur-pemusnahan.*') ? 'active' : '' }}">
                     <i data-lucide="truck" size="18"></i>
@@ -236,6 +246,9 @@
                     <a href="{{ route('admin.monitoring.expiry') }}" class="nav-item {{ request()->routeIs('admin.monitoring.expiry') ? 'active' : '' }}">
                         <i data-lucide="calendar" size="18"></i>
                         Monitoring Kadaluwarsa
+                        @if($nearExpiryCount > 0)
+                            <span class="badge badge-danger" style="margin-left: auto; font-size: 10px; border-radius: 12px; padding: 2px 6px;">{{ $nearExpiryCount }}</span>
+                        @endif
                     </a>
                     <a href="{{ route('apoteker.validasi.index') }}" class="nav-item {{ request()->routeIs('apoteker.validasi.*') ? 'active' : '' }}">
                         <i data-lucide="clipboard-check" size="18"></i>
@@ -308,7 +321,57 @@
             </div>
 
             <div class="navbar-actions">
-                <i data-lucide="bell" size="20" class="nav-icon"></i>
+                <div style="position: relative; display: inline-block;">
+                    <i data-lucide="bell" size="20" class="nav-icon" id="bellNotificationBtn" style="cursor: pointer;"></i>
+                    @if($nearExpiryCount > 0)
+                        <span style="position: absolute; top: -6px; right: -4px; background: #EF4444; color: white; border-radius: 50%; width: 16px; height: 16px; font-size: 9px; font-weight: 800; display: flex; align-items: center; justify-content: center; border: 2px solid white; pointer-events: none;">
+                            {{ $nearExpiryCount }}
+                        </span>
+                    @endif
+                    
+                    <!-- Notification Dropdown Menu -->
+                    <div id="notificationDropdown" style="display: none; position: absolute; top: 32px; right: 0; background: white; border: 1px solid #E2E8F0; border-radius: 8px; width: 340px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); z-index: 1000; overflow: hidden;">
+                        <div style="padding: 12px 16px; border-bottom: 1px solid #F1F5F9; display: flex; justify-content: space-between; align-items: center; background: #F8FAFC;">
+                            <span style="font-size: 13.5px; font-weight: 800; color: #1E293B;">Notifikasi ({{ $nearExpiryCount }})</span>
+                            @if($nearExpiryCount > 0)
+                                <span style="font-size: 10px; background: #E0E8FF; color: #0F62FE; padding: 2px 8px; border-radius: 20px; font-weight: 700;">Baru</span>
+                            @endif
+                        </div>
+                        <div style="max-height: 280px; overflow-y: auto;">
+                            @forelse($unreadNotifications as $notif)
+                                <a href="{{ route('notifications.read', $notif->id) }}" style="display: block; padding: 12px 16px; border-bottom: 1px solid #F1F5F9; text-decoration: none; transition: background 0.15s; text-align: left;" onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='white'">
+                                    <div style="display: flex; gap: 10px; align-items: flex-start;">
+                                        @if($notif->type === 'expiry')
+                                            <div style="background: #FEF2F2; color: #EF4444; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
+                                                <i data-lucide="alert-triangle" size="14"></i>
+                                            </div>
+                                        @else
+                                            <div style="background: #EFF6FF; color: #1D4ED8; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
+                                                <i data-lucide="bell" size="14"></i>
+                                            </div>
+                                        @endif
+                                        <div style="flex: 1;">
+                                            <div style="font-size: 12.5px; font-weight: 700; color: #1E293B; line-height: 1.3;">{{ $notif->title }}</div>
+                                            <div style="font-size: 11px; color: #475569; margin-top: 3px; line-height: 1.4;">{{ $notif->message }}</div>
+                                            <div style="font-size: 10px; color: #94A3B8; margin-top: 5px; display: flex; align-items: center; gap: 4px;">
+                                                <i data-lucide="clock" size="10"></i>
+                                                {{ $notif->created_at->diffForHumans() }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            @empty
+                                <div style="padding: 30px 16px; text-align: center; color: #94A3B8;">
+                                    <i data-lucide="check-circle" size="28" style="color: #10B981; display: block; margin: 0 auto 8px;"></i>
+                                    <span style="font-size: 12.5px; font-weight: 600;">Tidak ada notifikasi baru.</span>
+                                </div>
+                            @endforelse
+                        </div>
+                        <a href="{{ route('notifications.index') }}" style="display: block; padding: 10px; text-align: center; font-size: 12px; font-weight: 800; color: #0B3E9C; background: #F1F5F9; text-decoration: none; border-top: 1px solid #E2E8F0; transition: background 0.15s;" onmouseover="this.style.background='#E2E8F0'" onmouseout="this.style.background='#F1F5F9'">
+                            Lihat Semua Notifikasi
+                        </a>
+                    </div>
+                </div>
                 <i data-lucide="help-circle" size="20" class="nav-icon"></i>
                 
                 <div class="user-profile">
@@ -451,6 +514,18 @@
                 confirmButtonColor: '#4F46E5'
             });
         @endif
+
+        // Toggle notification dropdown (using event delegation to support Lucide SVG replacement)
+        $(document).on('click', '#bellNotificationBtn', function(e) {
+            e.stopPropagation();
+            $('#notificationDropdown').toggle();
+        });
+
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('#bellNotificationBtn, #notificationDropdown').length) {
+                $('#notificationDropdown').hide();
+            }
+        });
     </script>
     @stack('scripts')
 </body>

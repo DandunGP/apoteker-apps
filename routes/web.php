@@ -29,6 +29,12 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('auth')->name('dashboard');
 Route::get('/dashboard/export-fifo', [DashboardController::class, 'exportFifo'])->middleware('auth')->name('dashboard.export-fifo');
 
+Route::middleware(['auth'])->group(function () {
+    Route::get('notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('notifications/mark-all-read', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
+    Route::get('notifications/{notification}/read', [\App\Http\Controllers\NotificationController::class, 'readAndRedirect'])->name('notifications.read');
+});
+
 use App\Http\Controllers\MedicineController;
 use App\Http\Controllers\BatchController;
 use App\Http\Controllers\StockAdjustmentController;

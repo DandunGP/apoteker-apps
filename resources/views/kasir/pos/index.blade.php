@@ -53,7 +53,7 @@
         margin-bottom: 2rem;
     }
 
-    .item-card {
+    .pos-item-card {
         background: white;
         border: 1px solid var(--border, #E2E8F0);
         border-radius: 8px;
@@ -62,16 +62,16 @@
         flex-direction: column;
         transition: all 0.2s;
     }
-    .item-card:hover {
+    .pos-item-card:hover {
         border-color: var(--primary);
         box-shadow: 0 4px 12px rgba(15, 98, 254, 0.1);
     }
     
-    .item-card.category-antibiotik { border-top: 3px solid #0F62FE; }
-    .item-card.category-analgesik { border-top: 3px solid #10B981; }
-    .item-card.category-vitamin { border-top: 3px solid #3B82F6; }
-    .item-card.category-psikotropika { border-top: 3px solid #EF4444; }
-    .item-card.category-layanan { border-top: 3px solid #64748B; }
+    .pos-item-card.category-antibiotik { border-top: 3px solid #0F62FE; }
+    .pos-item-card.category-analgesik { border-top: 3px solid #10B981; }
+    .pos-item-card.category-vitamin { border-top: 3px solid #3B82F6; }
+    .pos-item-card.category-psikotropika { border-top: 3px solid #EF4444; }
+    .pos-item-card.category-layanan { border-top: 3px solid #64748B; }
 
     .item-badge {
         font-size: 10px;
@@ -344,6 +344,34 @@
         color: var(--text-main);
         cursor: pointer;
     }
+
+    .local-pos-search {
+        position: relative;
+        width: 260px;
+    }
+    .local-pos-search input {
+        width: 100%;
+        background: white;
+        border: 1px solid #E2E8F0;
+        border-radius: 20px;
+        padding: 6px 12px 6px 32px;
+        font-size: 12px;
+        color: #1e293b;
+        outline: none;
+    }
+    .local-pos-search input::placeholder {
+        color: #94a3b8;
+    }
+    .local-pos-search i, .local-pos-search svg {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        pointer-events: none;
+        width: 14px;
+        height: 14px;
+    }
 </style>
 
 <div class="pos-container">
@@ -361,69 +389,70 @@
                 <h1 class="pos-title">Inventory Penjualan</h1>
                 <p class="pos-subtitle">Prioritas pengeluaran berdasarkan sistem FIFO (First-In, First-Out)</p>
             </div>
-            <button class="filter-btn"><i data-lucide="filter" size="14"></i> Filter</button>
+            {{-- <button class="filter-btn"><i data-lucide="filter" size="14"></i> Filter</button> --}}
         </div>
     </div>
 
     <div class="pos-layout">
         <!-- Left Area -->
         <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <div class="section-title">Daftar Obat</div>
+                <div class="local-pos-search">
+                    <i data-lucide="search" size="14"></i>
+                    <input type="text" id="searchMedicineInput" placeholder="Cari obat...">
+                </div>
+            </div>
+
             <!-- Medicine Grid -->
-            <div class="item-grid">
-            @foreach($medicines as $medicine)
-                @php
-                    $catClass = 'antibiotik';
-                    $kategori = strtolower($medicine->kategori ?? '');
-                    if (str_contains($kategori, 'analgesik')) $catClass = 'analgesik';
-                    elseif (str_contains($kategori, 'vitamin')) $catClass = 'vitamin';
-                    elseif (str_contains($kategori, 'psikotropika')) $catClass = 'psikotropika';
-                @endphp
-                <div class="item-card category-{{ $catClass }}">
-                    <div class="item-badge badge-{{ $catClass }}">{{ $medicine->kategori ?? 'UMUM' }}</div>
-                    <div class="item-title">{{ $medicine->nama }}</div>
-                    
-                    <div class="item-details">
-                        <span>Batch</span> 
-                        <span class="highlight">{{ $medicine->kode }}</span> <!-- Mocking Batch logic with code for display -->
-                        
-                        <span>Terdekat</span> 
-                        <span class="highlight">(12/2026)</span> <!-- Mock data -->
-                        
-                        <span>Stok Total</span> 
-                        <span>{{ number_format($medicine->total_stock, 0, ',', '.') }} Kaplet</span>
-                    </div>
+            <div class="item-grid" id="medicineGrid">
+                <!-- Dynamically populated via JS -->
+            </div>
 
-                    <div class="item-footer">
-                        <div>
-                            <div class="item-price">Rp {{ number_format($medicine->harga, 0, ',', '.') }}</div>
-                            @if($catClass == 'psikotropika')
-                                <div class="item-price-sub">Resep Dokter</div>
-                            @endif
-                        </div>
-                        <button class="btn-pilih" onclick="addToCart('medicine', {{ json_encode($medicine) }})">Pilih</button>
-                    </div>
+            <!-- Medicine Pagination & Limit -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; margin-bottom: 2rem;">
+                <div style="font-size: 12px; color: #64748B; display: flex; align-items: center; gap: 8px;">
+                    Tampilkan
+                    <select id="medicineLimitSelect" style="padding: 4px 8px; border: 1px solid #E2E8F0; border-radius: 6px; background: white; font-size: 12px; outline: none; cursor: pointer;">
+                        <option value="6" selected>6</option>
+                        <option value="12">12</option>
+                        <option value="24">24</option>
+                        <option value="50">50</option>
+                    </select>
+                    data per halaman
                 </div>
-            @endforeach
-        </div>
+                <div id="medicinePagination" style="display: flex; gap: 6px;"></div>
+            </div>
 
-        <div class="section-title">Layanan Cek Kesehatan</div>
-        <div class="section-subtitle">Pemeriksaan medis ringan oleh apoteker</div>
-
-        <!-- Services Grid -->
-        <div class="item-grid">
-            @foreach($services as $service)
-                <div class="item-card category-layanan">
-                    <div class="item-badge badge-layanan">LAYANAN</div>
-                    <div class="item-title" style="margin-bottom: 2rem;">{{ $service->nama }}</div>
-                    
-                    <div class="item-footer">
-                        <div class="item-price">Rp {{ number_format($service->harga, 0, ',', '.') }}</div>
-                        <button class="btn-pilih" onclick="addToCart('service', {{ json_encode($service) }})">Pilih</button>
-                    </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; margin-bottom: 1rem;">
+                <div class="section-title">Layanan Cek Kesehatan</div>
+                <div class="local-pos-search">
+                    <i data-lucide="search" size="14"></i>
+                    <input type="text" id="searchServiceInput" placeholder="Cari layanan...">
                 </div>
-            @endforeach
+            </div>
+            <div class="section-subtitle" style="margin-bottom: 1.5rem;">Pemeriksaan medis ringan oleh apoteker</div>
+
+            <!-- Services Grid -->
+            <div class="item-grid" id="serviceGrid">
+                <!-- Dynamically populated via JS -->
+            </div>
+
+            <!-- Service Pagination & Limit -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; margin-bottom: 2rem;">
+                <div style="font-size: 12px; color: #64748B; display: flex; align-items: center; gap: 8px;">
+                    Tampilkan
+                    <select id="serviceLimitSelect" style="padding: 4px 8px; border: 1px solid #E2E8F0; border-radius: 6px; background: white; font-size: 12px; outline: none; cursor: pointer;">
+                        <option value="6" selected>6</option>
+                        <option value="12">12</option>
+                        <option value="24">24</option>
+                        <option value="50">50</option>
+                    </select>
+                    data per halaman
+                </div>
+                <div id="servicePagination" style="display: flex; gap: 6px;"></div>
+            </div>
         </div>
-    </div>
 
     <!-- Right Area: Cart -->
     <div class="cart-sidebar">
@@ -455,24 +484,16 @@
                     <span>Subtotal</span>
                     <span id="subtotalLabel">Rp 0</span>
                 </div>
-                <div class="summary-row">
-                    <span>PPN (11%)</span>
-                    <span id="ppnLabel">Rp 0</span>
-                </div>
                 <div class="summary-row total">
                     <span>Total Akhir</span>
                     <span id="totalLabel">Rp 0</span>
                 </div>
             </div>
 
-            <div class="payment-methods">
-                <div class="btn-payment active" onclick="setPayment('tunai', this)">
+            <div class="payment-methods" style="grid-template-columns: 1fr;">
+                <div class="btn-payment active" onclick="setPayment('tunai', this)" style="cursor: default;">
                     <i data-lucide="banknote" size="24"></i>
                     TUNAI
-                </div>
-                <div class="btn-payment" onclick="setPayment('qris', this)">
-                    <i data-lucide="qr-code" size="24"></i>
-                    QRIS / NON-TUNAI
                 </div>
             </div>
 
@@ -489,6 +510,9 @@
 
 @push('scripts')
 <script>
+    const medicinesData = @json($medicines);
+    const servicesData = @json($services);
+
     let cart = [];
     try {
         const saved = localStorage.getItem('pos_cart');
@@ -508,6 +532,199 @@
         timer: 2000,
         timerProgressBar: true
     });
+
+    function getCategoryClass(kategori) {
+        kategori = (kategori || '').toLowerCase();
+        if (kategori.includes('analgesik')) return 'analgesik';
+        if (kategori.includes('vitamin')) return 'vitamin';
+        if (kategori.includes('psikotropika')) return 'psikotropika';
+        return 'antibiotik';
+    }
+
+    let currentMedicinePage = 1;
+    let currentServicePage = 1;
+    let medicineItemsPerPage = 6;
+    let serviceItemsPerPage = 6;
+
+    function renderPaginationControls(container, currentPage, totalPages, callbackName) {
+        if (totalPages <= 1) {
+            container.innerHTML = '';
+            return;
+        }
+
+        let html = '';
+        
+        // Prev button
+        html += `
+            <button class="qty-btn" ${currentPage === 1 ? 'disabled style="opacity: 0.4; cursor: not-allowed;"' : ''} onclick="${callbackName}(${currentPage - 1})">
+                <i data-lucide="chevron-left" size="14"></i>
+            </button>
+        `;
+
+        for (let i = 1; i <= totalPages; i++) {
+            if (i === currentPage) {
+                html += `
+                    <button class="qty-btn active" style="background: #0B3E9C; color: white; border-color: #0B3E9C; font-weight: 800; width: auto; padding: 0 8px;">${i}</button>
+                `;
+            } else {
+                html += `
+                    <button class="qty-btn" onclick="${callbackName}(${i})">${i}</button>
+                `;
+            }
+        }
+
+        // Next button
+        html += `
+            <button class="qty-btn" ${currentPage === totalPages ? 'disabled style="opacity: 0.4; cursor: not-allowed;"' : ''} onclick="${callbackName}(${currentPage + 1})">
+                <i data-lucide="chevron-right" size="14"></i>
+            </button>
+        `;
+
+        container.innerHTML = html;
+    }
+
+    window.changeMedicinePage = (page) => {
+        currentMedicinePage = page;
+        renderMedicines();
+    };
+
+    window.changeServicePage = (page) => {
+        currentServicePage = page;
+        renderServices();
+    };
+
+    function addMedicineById(id) {
+        const item = medicinesData.find(m => m.id === id);
+        if (item) {
+            addToCart('medicine', item);
+        }
+    }
+
+    function addServiceById(id) {
+        const item = servicesData.find(s => s.id === id);
+        if (item) {
+            addToCart('service', item);
+        }
+    }
+
+    function renderMedicines() {
+        const grid = document.getElementById('medicineGrid');
+        const paginationContainer = document.getElementById('medicinePagination');
+        
+        const query = document.getElementById('searchMedicineInput').value.toLowerCase().trim();
+        const filtered = medicinesData.filter(m => 
+            m.nama.toLowerCase().includes(query) || 
+            (m.kategori && m.kategori.toLowerCase().includes(query)) ||
+            (m.kode && m.kode.toLowerCase().includes(query))
+        );
+
+        const totalItems = filtered.length;
+        const totalPages = Math.ceil(totalItems / medicineItemsPerPage) || 1;
+        
+        if (currentMedicinePage > totalPages) {
+            currentMedicinePage = totalPages;
+        }
+
+        const startIndex = (currentMedicinePage - 1) * medicineItemsPerPage;
+        const pageItems = filtered.slice(startIndex, startIndex + medicineItemsPerPage);
+
+        if (pageItems.length === 0) {
+            grid.innerHTML = `
+                <div style="grid-column: 1 / -1; background: white; border: 1px solid #E2E8F0; border-radius: 8px; padding: 40px; text-align: center; color: #64748B;">
+                    <i data-lucide="package-x" size="36" style="margin: 0 auto 12px; display: block; opacity: 0.5;"></i>
+                    <p style="font-size: 13.5px; font-weight: 600; margin: 0;">Obat tidak ditemukan</p>
+                </div>
+            `;
+            paginationContainer.innerHTML = '';
+            if (window.lucide) lucide.createIcons();
+            return;
+        }
+
+        grid.innerHTML = pageItems.map(medicine => {
+            const catClass = getCategoryClass(medicine.kategori);
+            const isOutOfStock = medicine.total_stock <= 0;
+            const cardStyle = isOutOfStock ? 'opacity: 0.65;' : '';
+            
+            return `
+                <div class="pos-item-card category-${catClass}" style="${cardStyle}">
+                    <div class="item-badge badge-${catClass}">${medicine.kategori || 'UMUM'}</div>
+                    <div class="item-title">${medicine.nama}</div>
+                    
+                    <div class="item-details">
+                        <span>Batch</span> 
+                        <span class="highlight">${medicine.kode}</span>
+                        
+                        <span>Terdekat</span> 
+                        <span class="highlight">(12/2026)</span>
+                        
+                        <span>Stok Total</span> 
+                        <span>${medicine.total_stock.toLocaleString('id-ID')} Kaplet</span>
+                    </div>
+
+                    <div class="item-footer">
+                        <div>
+                            <div class="item-price">Rp ${medicine.harga.toLocaleString('id-ID')}</div>
+                            ${catClass === 'psikotropika' ? '<div class="item-price-sub">Resep Dokter</div>' : ''}
+                        </div>
+                        ${isOutOfStock 
+                            ? '<button class="btn-pilih" disabled style="background: #E2E8F0; color: #94A3B8; cursor: not-allowed;">Habis</button>'
+                            : `<button class="btn-pilih" onclick="addMedicineById(${medicine.id})">Pilih</button>`
+                        }
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        renderPaginationControls(paginationContainer, currentMedicinePage, totalPages, 'window.changeMedicinePage');
+        if (window.lucide) lucide.createIcons();
+    }
+
+    function renderServices() {
+        const grid = document.getElementById('serviceGrid');
+        const paginationContainer = document.getElementById('servicePagination');
+        
+        const query = document.getElementById('searchServiceInput').value.toLowerCase().trim();
+        const filtered = servicesData.filter(s => 
+            s.nama.toLowerCase().includes(query)
+        );
+
+        const totalItems = filtered.length;
+        const totalPages = Math.ceil(totalItems / serviceItemsPerPage) || 1;
+        
+        if (currentServicePage > totalPages) {
+            currentServicePage = totalPages;
+        }
+
+        const startIndex = (currentServicePage - 1) * serviceItemsPerPage;
+        const pageItems = filtered.slice(startIndex, startIndex + serviceItemsPerPage);
+
+        if (pageItems.length === 0) {
+            grid.innerHTML = `
+                <div style="grid-column: 1 / -1; background: white; border: 1px solid #E2E8F0; border-radius: 8px; padding: 40px; text-align: center; color: #64748B;">
+                    <i data-lucide="activity" size="36" style="margin: 0 auto 12px; display: block; opacity: 0.5;"></i>
+                    <p style="font-size: 13.5px; font-weight: 600; margin: 0;">Layanan tidak ditemukan</p>
+                </div>
+            `;
+            paginationContainer.innerHTML = '';
+            if (window.lucide) lucide.createIcons();
+            return;
+        }
+
+        grid.innerHTML = pageItems.map(service => `
+            <div class="pos-item-card category-layanan">
+                <div class="item-badge badge-layanan">LAYANAN</div>
+                <div class="item-title" style="margin-bottom: 2rem;">${service.nama}</div>
+                
+                <div class="item-footer">
+                    <div class="item-price">Rp ${service.harga.toLocaleString('id-ID')}</div>
+                    <button class="btn-pilih" onclick="addServiceById(${service.id})">Pilih</button>
+                </div>
+            </div>
+        `).join('');
+
+        renderPaginationControls(paginationContainer, currentServicePage, totalPages, 'window.changeServicePage');
+        if (window.lucide) lucide.createIcons();
+    }
 
     function addToCart(type, item) {
         const id = parseInt(item.id);
@@ -579,7 +796,6 @@
             container.innerHTML = '';
             checkoutBtn.disabled = true;
             document.getElementById('subtotalLabel').innerText = 'Rp 0';
-            document.getElementById('ppnLabel').innerText = 'Rp 0';
             document.getElementById('totalLabel').innerText = 'Rp 0';
         } else {
             empty.style.display = 'none';
@@ -603,13 +819,11 @@
             checkoutBtn.disabled = false;
             
             const subtotal = cart.reduce((acc, item) => acc + (item.harga * item.quantity), 0) + resepFee;
-            const ppn = subtotal * 0.11;
-            const totalAkhir = subtotal + ppn;
-
+            const totalAkhir = subtotal;
+ 
             document.getElementById('subtotalLabel').innerText = 'Rp ' + subtotal.toLocaleString('id-ID');
-            document.getElementById('ppnLabel').innerText = 'Rp ' + ppn.toLocaleString('id-ID', {maximumFractionDigits: 0});
             document.getElementById('totalLabel').innerText = 'Rp ' + totalAkhir.toLocaleString('id-ID', {maximumFractionDigits: 0});
-
+ 
             if (window.lucide) lucide.createIcons();
         }
     }
@@ -619,7 +833,7 @@
         
         const { isConfirmed } = await Swal.fire({
             title: 'Proses Pembayaran?',
-            text: "Konfirmasi pembayaran menggunakan " + (paymentMethod === 'tunai' ? 'Tunai' : 'QRIS/Non-Tunai'),
+            text: "Konfirmasi pembayaran menggunakan Tunai",
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#059669',
@@ -673,10 +887,34 @@
         }
     }
 
-    // Initialize lucide on load
+    // Initialize on load
     document.addEventListener("DOMContentLoaded", function() {
         lucide.createIcons();
         renderCart();
+        renderMedicines();
+        renderServices();
+
+        document.getElementById('searchMedicineInput').addEventListener('input', () => {
+            currentMedicinePage = 1;
+            renderMedicines();
+        });
+
+        document.getElementById('searchServiceInput').addEventListener('input', () => {
+            currentServicePage = 1;
+            renderServices();
+        });
+
+        document.getElementById('medicineLimitSelect').addEventListener('change', (e) => {
+            medicineItemsPerPage = parseInt(e.target.value);
+            currentMedicinePage = 1;
+            renderMedicines();
+        });
+
+        document.getElementById('serviceLimitSelect').addEventListener('change', (e) => {
+            serviceItemsPerPage = parseInt(e.target.value);
+            currentServicePage = 1;
+            renderServices();
+        });
     });
 </script>
 @endpush

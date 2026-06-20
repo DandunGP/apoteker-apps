@@ -701,7 +701,7 @@
                 <th style="width: 12%;">Stok Minimum</th>
                 <th style="width: 12%;">No. Batch</th>
                 <th style="width: 13%;">Tanggal Kadaluwarsa</th>
-                <th style="width: 8%;">Aksi</th>
+                <th style="width: 8%;">{{ auth()->user()->role === 'admin_gudang' ? 'Aksi' : 'Status' }}</th>
             </tr>
         </thead>
         <tbody>
@@ -773,15 +773,21 @@
                     <!-- 7. Aksi -->
                     <td>
                         <div class="action-icons">
-                            <a href="{{ route('medicines.edit', $item->id) }}" class="action-btn" title="Lihat Detail / Edit">
-                                <i data-lucide="eye" size="16"></i>
-                            </a>
-                            <a href="{{ route('batches.create') }}?medicine_id={{ $item->id }}" class="action-btn" title="Re-stock / Tambah Batch">
-                                <i data-lucide="plus-square" size="16"></i>
-                            </a>
+                            @if(auth()->user()->role === 'admin_gudang')
+                                <a href="{{ route('medicines.edit', $item->id) }}" class="action-btn" title="Lihat Detail / Edit">
+                                    <i data-lucide="eye" size="16"></i>
+                                </a>
+                                <a href="{{ route('batches.create') }}?medicine_id={{ $item->id }}" class="action-btn" title="Re-stock / Tambah Batch">
+                                    <i data-lucide="plus-square" size="16"></i>
+                                </a>
+                            @endif
                             @if($item->is_kritis)
                                 <a href="#" onclick="Swal.fire({title: 'Stok Kritis!', text: 'Stok obat ini berada di bawah batas minimum aman. Disarankan untuk segera melakukan pemesanan ulang (Restock)!', icon: 'warning', confirmButtonColor: '#EF4444'}); return false;" class="action-btn action-btn-danger" title="Status Kritis">
                                     <i data-lucide="alert-octagon" size="16"></i>
+                                </a>
+                            @else
+                                <a href="#" onclick="Swal.fire({title: 'Stok Aman', text: 'Stok obat ini dalam kondisi aman.', icon: 'success', confirmButtonColor: '#059669'}); return false;" class="action-btn" style="color: #059669;" title="Status Aman">
+                                    <i data-lucide="check-circle" size="16"></i>
                                 </a>
                             @endif
                         </div>

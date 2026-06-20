@@ -13,7 +13,7 @@ class POSController extends Controller
         }])->get()->map(function ($medicine) {
             $medicine->total_stock = $medicine->batches->sum('stok_sisa');
             return $medicine;
-        });
+        })->sortByDesc('total_stock')->values();
 
         $services = \App\Models\Service::all();
 
@@ -27,7 +27,7 @@ class POSController extends Controller
             'items.*.type' => 'required|in:medicine,service',
             'items.*.id' => 'required|integer',
             'items.*.quantity' => 'required|integer|min:1',
-            'payment_method' => 'required|in:tunai,qris',
+            'payment_method' => 'required|in:tunai',
         ]);
 
         \DB::beginTransaction();

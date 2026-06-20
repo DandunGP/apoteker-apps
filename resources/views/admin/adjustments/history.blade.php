@@ -245,8 +245,10 @@
     <div class="breadcrumb">
         <a href="{{ route('dashboard') }}">{{ str_replace('_', ' ', auth()->user()->role) }}</a>
         <span>&gt;</span>
-        <a href="{{ route('adjustments.index') }}">Stock Opname</a>
-        <span>&gt;</span>
+        @if(auth()->user()->role === 'admin_gudang')
+            <a href="{{ route('adjustments.index') }}">Stock Opname</a>
+            <span>&gt;</span>
+        @endif
         <span class="active">Riwayat</span>
     </div>
 
@@ -256,10 +258,17 @@
             <h1>Riwayat Stok Opname</h1>
             <p>Audit trail log lengkap penyesuaian stok fisik vs stok sistem.</p>
         </div>
-        <a href="{{ route('adjustments.index') }}" class="btn-action-outline">
-            <i data-lucide="arrow-left" size="16"></i>
-            Kembali ke Penyesuaian
-        </a>
+        @if(auth()->user()->role === 'admin_gudang')
+            <a href="{{ route('adjustments.index') }}" class="btn-action-outline">
+                <i data-lucide="arrow-left" size="16"></i>
+                Kembali ke Penyesuaian
+            </a>
+        @else
+            <a href="{{ route('dashboard') }}" class="btn-action-outline">
+                <i data-lucide="arrow-left" size="16"></i>
+                Kembali ke Dashboard
+            </a>
+        @endif
     </div>
 
     <!-- Main Data Table Card -->
