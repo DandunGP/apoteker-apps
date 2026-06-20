@@ -41,7 +41,7 @@ services:
     container_name: apoteker-apps-db
     restart: unless-stopped
     ports:
-      - "3306:3306"
+      - "127.0.0.1:3306:3306"
     environment:
       MYSQL_DATABASE: ${DB_DATABASE:-apoteker_apps}
       MYSQL_ROOT_PASSWORD: root
