@@ -42,8 +42,21 @@ class TestEmail extends Command
         // Fetch a batch to mock the mail data
         $batch = MedicineBatch::with('medicine')->first();
         if (!$batch) {
-            $this->error("No medicine batch found in the database. Please ensure the database is seeded.");
-            return Command::FAILURE;
+            $medicine = \App\Models\Medicine::first();
+            if (!$medicine) {
+                $this->error("No medicines found. Please run db:seed first.");
+                return Command::FAILURE;
+            }
+            $batch = MedicineBatch::create([
+                'medicine_id' => $medicine->id,
+                'no_batch' => 'BATCH-TEST-999',
+                'stok_awal' => 100,
+                'stok_sisa' => 45,
+                'tanggal_masuk' => now()->format('Y-m-d'),
+                'tanggal_kadaluwarsa' => now()->addDays(20)->format('Y-m-d'),
+                'is_validated' => 1,
+            ]);
+            $batch->load('medicine');
         }
 
         $medicineName = $batch->medicine->nama ?? 'Obat Test';
