@@ -72,6 +72,15 @@ class CheckExpiringMedicines extends Command
                     'reference_id' => $batch->id,
                     'reference_type' => 'batch',
                 ]);
+
+                // Send email notification
+                try {
+                    \Illuminate\Support\Facades\Mail::to($user->email)->send(
+                        new \App\Mail\ExpiryNotificationMail($user, $batch, $message)
+                    );
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error("Failed to send expiry email to {$user->email}: " . $e->getMessage());
+                }
             }
             $count++;
         }

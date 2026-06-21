@@ -8,6 +8,7 @@ use App\Models\Notification;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class NotificationTest extends TestCase
@@ -16,6 +17,8 @@ class NotificationTest extends TestCase
 
     public function test_scan_and_generate_expiry_notifications()
     {
+        Mail::fake();
+
         // 1. Create users with roles that should receive notifications
         $admin = User::create([
             'name' => 'Admin Test',
@@ -84,6 +87,20 @@ class NotificationTest extends TestCase
         $this->artisan('check:expiring-medicines')
             ->expectsOutput('Successfully generated notifications for 1 expiring batches.')
             ->assertExitCode(0);
+
+        // Assert mail was sent to admin and pharmacist
+        Mail::assertSent(\App\Mail\ExpiryNotificationMail::class, function ($mail) use ($admin) {
+            return $mail->hasTo($admin->email);
+        });
+
+        Mail::assertSent(\App\Mail\ExpiryNotificationMail::class, function ($mail) use ($pharmacist) {
+            return $mail->hasTo($pharmacist->email);
+        });
+
+        // Assert mail was NOT sent to cashier
+        Mail::assertNotSent(\App\Mail\ExpiryNotificationMail::class, function ($mail) use ($cashier) {
+            return $mail->hasTo($cashier->email);
+        });
 
         // 5. Assert database records
         // Admin Gudang should have 1 notification for BATCH-EXP-001
@@ -223,6 +240,8 @@ class NotificationTest extends TestCase
 
     public function test_user_can_mark_all_notifications_as_read()
     {
+        $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
+
         $user = User::create([
             'name' => 'Admin Test',
             'email' => 'admin_test@apotek.com',
