@@ -50,6 +50,17 @@ services:
     networks:
       - apoteker-network
 
+  # Mailpit Email testing service
+  mailpit:
+    image: axllent/mailpit
+    container_name: apoteker-apps-mailpit
+    restart: unless-stopped
+    ports:
+      - "8025:8025"
+    networks:
+      - apoteker-network
+
+
 # Docker Networks
 networks:
   apoteker-network:
